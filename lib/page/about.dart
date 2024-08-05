@@ -36,7 +36,7 @@ class _AboutState extends State<About> {
               SizedBox(
                 height: 10,
               ),
-              Text("douleTap: delete field for note", style: GoogleFonts.poppins(color: Colors.white),),
+              Text("doubleTap: delete field for note", style: GoogleFonts.poppins(color: Colors.white),),
               SizedBox(
                 height: 10,
               ),

@@ -14,19 +14,24 @@ class Xnote extends StatefulWidget {
 class _XnoteState extends State<Xnote> {
   final TextEditingController crt = TextEditingController();
   Stream<List<Map<String, dynamic>>>? dataNotes;
+  Stream<List<Map<String, dynamic>>>? dataTitle;
 
   @override
   void initState() {
     super.initState();
-    crt.text = widget.dbname;
+    // crt.text = widget.dbname;
     final ds = DataHelper.getNoteStream(widget.ids);
     dataNotes = ds;
+    final da = DataHelper.onlySTitleS(widget.ids);
+    dataTitle = da;
   }
 
   List<String> type = ["block", "quotes", "default", "divider"];
 
   void uptitle() async {
     DataHelper.updateData(widget.ids, crt.text);
+        final da = DataHelper.onlySTitleS(widget.ids);
+    dataTitle = da;
   }
 
   @override
@@ -44,29 +49,36 @@ class _XnoteState extends State<Xnote> {
         ),
         centerTitle: true,
       ),
-      bottomNavigationBar: SizedBox(
+      bottomNavigationBar: Container(
+          color: Colors.black,
           height: 50,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: type.map((t) {
-                  return GestureDetector(
-                      onTap: () async {
-                        await DataHelper.createNote(widget.ids, "__", t);
-                      },
-                      child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            color: const Color.fromARGB(204, 29, 29, 29),
-                          ),
-                          padding: EdgeInsets.all(4),
+          child: Column(
+            children: [
+              Divider(
+                color: const Color.fromARGB(255, 22, 22, 22),
+                indent: 1,
+                height: 3,
+              ),
+              // Spacer(),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: type.map((t) {
+                      return GestureDetector(
+                          onTap: () async {
+                            await DataHelper.createNote(widget.ids, "__", t);
+                            final ds = DataHelper.getNoteStream(widget.ids);
+                            dataNotes = ds;
+                          },
                           child: Text(
                             t,
                             style: GoogleFonts.roboto(color: Colors.white),
-                          )));
-                }).toList()),
+                          ));
+                    }).toList()),
+              ),
+            ],
           )),
       body: Padding(
         padding: EdgeInsets.all(12),
@@ -83,33 +95,48 @@ class _XnoteState extends State<Xnote> {
               const SizedBox(
                 height: 5,
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.transparent),
-                child: TextField(
-                  minLines: 1,
-                  maxLines: null,
-                  readOnly: false,
-                  cursorColor: Colors.blueAccent,
-                  controller: crt,
-                  onChanged: (p0) => uptitle(),
-                  toolbarOptions:
-                      ToolbarOptions(copy: false, cut: false, paste: false),
-                  autocorrect: false,
-                  autofocus: false,
-                  decoration: InputDecoration(
-                    // icon: Icon(Icons.title),
-                    border: InputBorder.none,
-                    hintText: "title",
-                    hintStyle: TextStyle(color: Colors.grey.shade800),
-                  ),
-                  style: GoogleFonts.roboto(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700),
-                ),
+              StreamBuilder<List<Map<String, dynamic>>>(
+                stream: dataTitle,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SizedBox();
+                  }
+                  final data = snapshot.data!;
+                  return Column(
+                    children: data.map((e) {
+                      final title = e["title"];
+                      crt.text = title;
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.transparent),
+                        child: TextField(
+                          minLines: 1,
+                          maxLines: null,
+                          readOnly: false,
+                          cursorColor: Colors.blueAccent,
+                          controller: crt,
+                          onChanged: (p0) => uptitle(),
+                          toolbarOptions: ToolbarOptions(
+                              copy: false, cut: false, paste: false),
+                          autocorrect: false,
+                          autofocus: false,
+                          decoration: InputDecoration(
+                            // icon: Icon(Icons.title),
+                            border: InputBorder.none,
+                            hintText: "title",
+                            hintStyle: TextStyle(color: Colors.grey.shade800),
+                          ),
+                          style: GoogleFonts.roboto(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
               StreamBuilder<List<Map<String, dynamic>>>(
                 stream: dataNotes,
@@ -131,6 +158,8 @@ class _XnoteState extends State<Xnote> {
                         note = GestureDetector(
                           onDoubleTap: () {
                             DataHelper.delNotes(id);
+                            final ds = DataHelper.getNoteStream(widget.ids);
+                            dataNotes = ds;
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -170,6 +199,8 @@ class _XnoteState extends State<Xnote> {
                         note = GestureDetector(
                           onDoubleTap: () {
                             DataHelper.delNotes(id);
+                            final ds = DataHelper.getNoteStream(widget.ids);
+                            dataNotes = ds;
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -209,6 +240,8 @@ class _XnoteState extends State<Xnote> {
                         note = GestureDetector(
                           onDoubleTap: () {
                             DataHelper.delNotes(id);
+                            final ds = DataHelper.getNoteStream(widget.ids);
+                            dataNotes = ds;
                           },
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -243,15 +276,19 @@ class _XnoteState extends State<Xnote> {
                         );
                       } else if (type == "divider") {
                         note = GestureDetector(
-                          onDoubleTap: () {
+                          onTap: () {
                             DataHelper.delNotes(id);
+                            final ds = DataHelper.getNoteStream(widget.ids);
+                            dataNotes = ds;
                           },
                           child: Container(
-                            height: 2,
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1),
-                                color: Colors.grey.shade900),
+                            height: 8,
+                            child: Divider(
+                              color: const Color.fromARGB(255, 22, 22, 22),
+                              height: 3,
+                              indent: 1,
+                              thickness: 2,
+                            ),
                           ),
                         );
                       }

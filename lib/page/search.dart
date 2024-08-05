@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xenotes/func/data_helper.dart';
+import 'package:xenotes/page/xnote.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -136,7 +137,7 @@ class _SearchState extends State<Search> {
                                       IconButton(
                                           onPressed: () async {
                                             await DataHelper.delData(ids);
-                                            await DataHelper.delFNotes(title);
+                                            await DataHelper.delFNotes(ids);
                                             final data =
                                                 DataHelper.getDataStream();
                                             namedb = data;
@@ -145,8 +146,38 @@ class _SearchState extends State<Search> {
                                             Icons.delete,
                                             color: Colors.grey.shade500,
                                           )),
-                                      IconButton(
-                                          onPressed: () => (),
+                                       IconButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                PageRouteBuilder(
+                                                  pageBuilder: (context,
+                                                          animation,
+                                                          secondaryAnimation) =>
+                                                       Xnote(dbname: title,ids: ids,),
+                                                  transitionsBuilder: (context,
+                                                      animation,
+                                                      secondaryAnimation,
+                                                      child) {
+                                                    const begin =
+                                                        Offset(0.0, 1.0);
+                                                    const end = Offset.zero;
+                                                    const curve = Curves.ease;
+
+                                                    var tween = Tween(
+                                                            begin: begin,
+                                                            end: end)
+                                                        .chain(CurveTween(
+                                                            curve: curve));
+
+                                                    return SlideTransition(
+                                                      position: animation
+                                                          .drive(tween),
+                                                      child: child,
+                                                    );
+                                                  },
+                                                ));
+                                          },
                                           icon: Icon(
                                             Icons.edit,
                                             color: Colors.grey.shade500,

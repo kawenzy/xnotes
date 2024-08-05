@@ -117,10 +117,26 @@ class _HomeState extends State<Home> {
                     color: const Color.fromARGB(255, 20, 20, 20)),
                 child: TextField(
                   onTap: () => {
-                    Navigator.push(
+                     Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const Search(),
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  const Search(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0);
+                            const end = Offset.zero;
+                            const curve = Curves.ease;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          },
                         ))
                   },
                   readOnly: true,

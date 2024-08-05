@@ -80,6 +80,17 @@ class DataHelper {
     sdataStream.add(ds);
   }
 
+  static Stream<List<Map<String, dynamic>>> onlySTitleS(int id)  {
+    onlySTitle(id);
+    return sdataStream.stream;
+  }
+
+  static Future<void> onlySTitle(int id) async{
+    final db = await DataHelper.db();
+    final ds = await db.query("data", where: "id = ?", whereArgs: [id]);
+    sdataStream.add(ds);
+  }
+
   static Stream<List<Map<String, dynamic>>> getNoteStream(int m) {
     getNotes(m);
     return noteStream.stream;
